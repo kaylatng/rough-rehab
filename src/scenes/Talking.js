@@ -314,6 +314,7 @@ class Talking extends Phaser.Scene {
     this.waitingForChoice = true
     this.dialogTyping = false
     this.selectedChoice = 0
+    console.log("SHOWCHOICES: selectedChoice reset to 0")
 
     this.choiceTexts.forEach(text => text.destroy())
     this.choiceTexts = []
@@ -330,6 +331,7 @@ class Talking extends Phaser.Scene {
       choiceText.setInteractive({ useHandCursor: true })
 
       choiceText.on('pointerover', () => {
+        // WIP need to add hover visual
         this.selectedChoice = index
         this.updateChoiceDisplay()
       })
@@ -337,6 +339,7 @@ class Talking extends Phaser.Scene {
       choiceText.on('pointerdown', () => {
         this.sound.play('blip02', { volume: 1.0 })
         this.selectedChoice = index
+        console.log("SHOWCHOICES: selectedChoice is ", this.selectedChoice)
         this.startPuzzle()
       })
 
@@ -369,13 +372,14 @@ class Talking extends Phaser.Scene {
       centerX,
       30,
       this.DBOX_FONT,
-      'Drag pieces to solve!',
+      'Drag pieces to solve!\n(see reference on left)',
       24
     ).setOrigin(0.5, 0).setTint(0xffffff)
 
     // generate the choice text as a texture
     const currentLine = this.dialog[this.dialogConvo][this.dialogLine]
     const selectedOption = currentLine.choices[this.selectedChoice]
+    console.log("STARTPUZZLE: selectedOption is ", selectedOption, " selectedChoice is ", this.selectedChoice)
     const choiceText = selectedOption.text
 
     // create render texture
@@ -558,7 +562,16 @@ class Talking extends Phaser.Scene {
   }
 
   selectChoice() {
+    // WIP need to fix choice selection after 2nd choice pop-up
     const currentLine = this.dialog[this.dialogConvo][this.dialogLine]
+    console.log("SELECTCHOICE: printing currentLine ", currentLine)
+    console.log("SELECTCHOICE: printing selectedChoice ", this.selectedChoice)
+
+    if (!currentLine.choices) {
+      console.error("selectChoice called on a line w/o choices RETURN")
+      return
+    }
+
     const selectedOption = currentLine.choices[this.selectedChoice]
 
     this.choiceTexts.forEach(text => text.destroy())
