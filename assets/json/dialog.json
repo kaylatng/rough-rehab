@@ -1,0 +1,170 @@
+[
+  [
+    {
+      "speaker": "girl",
+      "dialog": "Ugh! I can't stand to look at you. This is a waste of time."
+    },
+    {
+      "speaker": "boy",
+      "dialog": "You never were nice to me ever since we started dating. At least I'm trying to save this.",
+      "newSpeaker": "true"
+    },
+    {
+      "speaker": "girl",
+      "dialog": "Why would I be nice to you after you admitted to wanting to cheat on me with your barber?!",
+      "newSpeaker": "true",
+      "action": "shake"
+    },
+    {
+      "speaker": "boy",
+      "dialog": "I never did! I just said the barber was attractive and my friends said the rest!",
+      "newSpeaker": "true"
+    },
+    {
+			"speaker" : "girl",
+			"dialog" : "And she gave you a trashy haircut.",
+			"newSpeaker" : "true"
+		},
+    {
+			"speaker" : "boy",
+			"dialog" : "...",
+			"newSpeaker" : "true"
+		},
+		{
+			"speaker" : "boy",
+			"dialog" : "Uncalled for...",
+			"newSpeaker" : "false",
+			"action": "shake"
+		},
+    {
+      "choices": [
+        {
+          "text": "Your comment might not be unfounded, but let's focus on something else.",
+          "nextConvo": 1
+        },
+        {
+          "text": "Yeah. She's right, your haircut is horrendous. Sorry, bro.",
+          "nextConvo": 2
+        },
+        {
+          "text": "How about we focus on what we can improve.",
+          "nextConvo": 3
+        }
+      ]
+    }
+  ],
+  [
+    {
+      "speaker": "boy",
+      "dialog": "Whatever. Let's just get on with this counseling.",
+      "newSpeaker": "true"
+    },
+    {
+      "speaker": "girl",
+      "dialog": "You were the one who booked it. Don't get so pissy because they agree with me.",
+      "newSpeaker": "true"
+    },
+    {
+      "choices": [
+        {
+          "text": "What actions would help rebuild you trust in each other?",
+          "nextConvo": 4
+        },
+        {
+          "text": "How about we set some boundaries moving forward.",
+          "nextConvo": 5
+        }
+      ]
+    }
+  ],
+  [
+    {
+      "speaker": "girl",
+      "dialog": "See? Even they agree with me! Face it, you have bad taste.",
+      "newSpeaker": "true"
+    },
+    {
+      "speaker": "boy",
+      "dialog": "Me? I didn't want to say it, but you look like a mess today. And the barber liked my hair!",
+      "newSpeaker": "true"
+    },
+    {
+      "choices": [
+        {
+          "text": "Both of you need to communicate better. Start by using less accusatory language.",
+          "nextConvo": 6
+        },
+        {
+          "text": "Sometimes we can save honest comments for another time...",
+          "nextConvo": 7
+        }
+      ]
+    }
+  ],
+  [
+    {
+      "speaker": "boy",
+      "dialog": "Maybe you're right. I can be more careful with my words.",
+      "newSpeaker": "true"
+    },
+    {
+      "speaker": "girl",
+      "dialog": "Thank you. You should be careful with your actions, too.",
+      "newSpeaker": "true"
+    }
+  ],
+  [
+    {
+      "speaker": "girl",
+      "dialog": "Start by not ogling every person who cuts your hair.",
+      "newSpeaker": "true",
+      "action": "shake"
+    },
+    {
+      "speaker": "boy",
+      "dialog": "You misunderstood! The barber reminded me of you. [end]",
+      "newSpeaker": "true",
+      "action": "shake",
+      "state": "end"
+    }
+  ],
+  [
+    {
+      "speaker": "boy",
+      "dialog": "I can do boundaries. What do you need from me?",
+      "newSpeaker": "true"
+    },
+    {
+      "speaker": "girl",
+      "dialog": "Respect. That's all I've ever wanted. [end]",
+      "newSpeaker": "true",
+      "state": "end"
+    }
+  ],
+  [
+    {
+      "speaker": "girl",
+      "dialog": "It's not accusatory if it's true.",
+      "newSpeaker": "true",
+      "action": "shake"
+    },
+    {
+      "speaker": "boy",
+      "dialog": "I'm sorry. I really am.",
+      "newSpeaker": "true"
+    }
+  ],
+  [
+    {
+      "speaker": "boy",
+      "dialog": "You're right. I'll be more careful.",
+      "newSpeaker": "true"
+    },
+    {
+      "speaker": "girl",
+      "dialog": "At least you're learning something. [end]",
+      "newSpeaker": "true",
+      "state": "end"
+    }
+  ]
+]
