@@ -409,8 +409,8 @@ class Talking extends Phaser.Scene {
     tempText.maxWidth = puzzleWidth - 30
     
     this.rt.draw(tempText, puzzleWidth / 2, puzzleHeight / 2)
-    this.rt.saveTexture('puzzleTexture')
-    this.rt.setVisible(false)
+    // this.rt.saveTexture('puzzleTexture')
+    // this.rt.setVisible(false)
     
     // create puzzle pieces
     this.createPuzzle(this.rt)
@@ -452,19 +452,19 @@ class Talking extends Phaser.Scene {
     for (let i = 0; i < positions.length; i++) {
       const { row, col } = positions[i]
       
-      // create a container for the piece
       const pieceContainer = this.add.container(0, 0)
-      
-      // create the background for the piece
       const pieceBg = this.add.rectangle(0, 0, pieceWidth - 2, pieceHeight - 2, 0xffffff)
       
       // create piece from render texture as a sprite
-      const pieceImg = this.add.sprite(0, 0, 'puzzleTexture') // renderTexture.texture.key
-      pieceImg.setCrop(col * pieceWidth, row * pieceHeight, pieceWidth, pieceHeight)
-      // pieceImg.setDisplaySize(pieceWidth - 2, pieceHeight - 2)
+      const pieceImg = this.add.renderTexture(0, 0, pieceWidth - 2, pieceHeight - 2)
+      pieceImg.draw(this.rt, 
+        (pieceWidth - 2) / 2 - col * pieceWidth + 80, 
+        (pieceHeight - 2) / 2 - row * pieceHeight + 80
+        // -40 if using puzzleTexture
+        // +80 if using this.rt
+      )
       pieceImg.setOrigin(0.5)
       
-      // add border
       const border = this.add.rectangle(0, 0, pieceWidth - 2, pieceHeight - 2)
       border.setStrokeStyle(2, 0x000000, 1)
       border.setFillStyle(0xffffff, 0)
@@ -485,7 +485,7 @@ class Talking extends Phaser.Scene {
       this.puzzleSourcePieces.push(pieceContainer)
     }
 
-    // setup drag events
+    // drag events
     this.input.on('dragstart', (pointer, gameObject) => {
       gameObject.setScale(1.05)
       this.children.bringToTop(gameObject)
@@ -525,7 +525,6 @@ class Talking extends Phaser.Scene {
       piece.disableInteractive()
       this.sound.play('blip01', { volume: 0.3 })
       
-      // check if puzzle is complete
       const allPlaced = this.puzzleSourcePieces.every(p => p.getData('placed'))
       if (allPlaced) {
         this.completePuzzle()
