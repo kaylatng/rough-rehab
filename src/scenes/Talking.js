@@ -72,6 +72,10 @@ class Talking extends Phaser.Scene {
     this.puzzleTargetSlots = []
     this.puzzleSourcePieces = []
     this.rt = null
+    this.comboTimeLimit = 3000 // 3 seconds between placements
+    this.comboTimer = null
+    this.comboTimerText = null
+    this.lastPlacementTime = null
 
     // character variables
     this.tweenDuration = 500
@@ -311,6 +315,14 @@ class Talking extends Phaser.Scene {
       this.choicebox3.setActive(true)
     }
 
+    this.choiceInstructionText = this.add.bitmapText(
+      centerX,
+      30,
+      this.DBOX_FONT,
+      'Choose a response as the mediator.',
+      24
+    ).setOrigin(0.5, 0).setTint(0xffffff)
+
     this.waitingForChoice = true
     this.dialogTyping = false
     this.selectedChoice = 0
@@ -364,17 +376,31 @@ class Talking extends Phaser.Scene {
     this.choiceTexts.forEach(text => text.setVisible(false))
     this.choiceboxGroup.setVisible(false)
 
+    if (this.choiceInstructionText) {
+      this.choiceInstructionText.destroy()
+    }
+
     this.playingPuzzle = true
     this.puzzleComplete = false
+    this.lastPlacementTime = null
 
     // create puzzle instruction text
     this.puzzleInstructionText = this.add.bitmapText(
       centerX,
       30,
       this.DBOX_FONT,
-      'Drag pieces to solve!\n(see reference on left)',
+      'Keep the combo going! Place pieces quickly!',
       24
     ).setOrigin(0.5, 0).setTint(0xffffff)
+
+    // create timer text (initially hidden)
+    this.comboTimerText = this.add.bitmapText(
+      centerX,
+      60,
+      this.DBOX_FONT,
+      '',
+      28
+    ).setOrigin(0.5, 0).setTint(0xffff00)
 
     // generate the choice text as a texture
     const currentLine = this.dialog[this.dialogConvo][this.dialogLine]
@@ -413,8 +439,7 @@ class Talking extends Phaser.Scene {
     tempText.maxWidth = puzzleWidth - 30
     
     this.rt.draw(tempText, puzzleWidth / 2, puzzleHeight / 2)
-    // this.rt.saveTexture('puzzleTexture')
-    // this.rt.setVisible(false)
+    this.rt.setVisible(false)
     
     // create puzzle pieces
     this.createPuzzle(this.rt)
@@ -506,6 +531,38 @@ class Talking extends Phaser.Scene {
     })
   }
 
+  startComboTimer() {
+    // stop existing timer if any
+    if (this.comboTimer) {
+      this.comboTimer.remove()
+    }
+
+    let timeRemaining = this.comboTimeLimit / 1000
+    
+    this.comboTimer = this.time.addEvent({
+      delay: 100,
+      repeat: (this.comboTimeLimit / 100) - 1,
+      callback: () => {
+        timeRemaining = Math.max(0, timeRemaining - 0.1)
+        this.comboTimerText.setText(`${timeRemaining.toFixed(1)}s`)
+        
+        // change color based on time remaining
+        if (timeRemaining <= 1) {
+          this.comboTimerText.setTint(0xff0000)
+        } else if (timeRemaining <= 2) {
+          this.comboTimerText.setTint(0xff9900)
+        } else {
+          this.comboTimerText.setTint(0xffff00)
+        }
+        
+        if (timeRemaining <= 0) {
+          this.failCombo()
+        }
+      },
+      callbackScope: this
+    })
+  }
+
   checkPiecePlacement(piece) {
     const correctRow = piece.getData('correctRow')
     const correctCol = piece.getData('correctCol')
@@ -529,6 +586,18 @@ class Talking extends Phaser.Scene {
       piece.disableInteractive()
       this.sound.play('blip01', { volume: 0.3 })
       
+      // flash the piece briefly
+      this.tweens.add({
+        targets: piece,
+        alpha: 0.5,
+        duration: 100,
+        yoyo: true,
+        ease: 'Linear'
+      })
+      
+      // start or restart the combo timer
+      this.startComboTimer()
+      
       const allPlaced = this.puzzleSourcePieces.every(p => p.getData('placed'))
       if (allPlaced) {
         this.completePuzzle()
@@ -536,8 +605,74 @@ class Talking extends Phaser.Scene {
     }
   }
 
+  failCombo() {
+    // stop the timer
+    if (this.comboTimer) {
+      this.comboTimer.remove()
+      this.comboTimer = null
+    }
+
+    // stop accepting input
+    this.input.off('dragstart')
+    this.input.off('drag')
+    this.input.off('dragend')
+    
+    // make all PLACED pieces float away
+    this.puzzleSourcePieces.forEach((piece, index) => {
+      if (piece.getData('placed')) {
+        piece.disableInteractive()
+        
+        // random direction and distance
+        const angle = Phaser.Math.FloatBetween(0, Math.PI * 2)
+        const distance = Phaser.Math.Between(300, 600)
+        const targetX = piece.x + Math.cos(angle) * distance
+        const targetY = piece.y + Math.sin(angle) * distance
+        
+        this.tweens.add({
+          targets: piece,
+          x: targetX,
+          y: targetY,
+          alpha: 0,
+          rotation: Phaser.Math.FloatBetween(-2, 2),
+          duration: 2000,
+          delay: index * 100,
+          ease: 'Cubic.easeOut'
+        })
+      }
+    })
+    
+    // show failure message
+    const failText = this.add.bitmapText(
+      centerX,
+      centerY,
+      this.DBOX_FONT,
+      'Combo broken! Try again...',
+      32
+    ).setOrigin(0.5).setTint(0xff0000).setAlpha(0)
+    
+    this.tweens.add({
+      targets: failText,
+      alpha: 1,
+      duration: 500,
+      yoyo: true,
+      hold: 1000,
+      onComplete: () => {
+        failText.destroy()
+        this.cleanupPuzzle()
+        // restart the puzzle
+        this.startPuzzle()
+      }
+    })
+  }
+
   completePuzzle() {
     this.sound.play('blip02', { volume: 0.5 })
+    
+    // stop the timer
+    if (this.comboTimer) {
+      this.comboTimer.remove()
+      this.comboTimer = null
+    }
     
     this.cameras.main.flash(500, 255, 255, 255)
     
@@ -556,6 +691,15 @@ class Talking extends Phaser.Scene {
     
     if (this.puzzleInstructionText) {
       this.puzzleInstructionText.destroy()
+    }
+    
+    if (this.comboTimerText) {
+      this.comboTimerText.destroy()
+    }
+    
+    if (this.comboTimer) {
+      this.comboTimer.remove()
+      this.comboTimer = null
     }
     
     this.playingPuzzle = false

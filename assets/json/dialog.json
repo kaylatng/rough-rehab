@@ -6,7 +6,7 @@
     },
     {
       "speaker": "boy",
-      "dialog": "You never were nice to me ever since we started dating. At least I'm trying to save this.",
+      "dialog": "Ever since we started dating, you were never nice to me. At least I'm trying to save this.",
       "newSpeaker": "true"
     },
     {
@@ -47,7 +47,7 @@
           "nextConvo": 2
         },
         {
-          "text": "How about we focus on what we can improve.",
+          "text": "How about we focus on what we can improve?",
           "nextConvo": 3
         }
       ]
@@ -71,7 +71,7 @@
           "nextConvo": 4
         },
         {
-          "text": "How about we set some boundaries moving forward.",
+          "text": "How about we set some boundaries moving forward?",
           "nextConvo": 5
         }
       ]
