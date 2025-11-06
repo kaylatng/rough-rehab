@@ -8,21 +8,22 @@ class Talking extends Phaser.Scene {
     this.DBOX_X = 25
     this.DBOX_Y = 400
     this.DBOX_FONT = 'futurahandwritten'
+    this.ALT_FONT = 'futurahandwritten_white'
 
     this.TEXT_X = 50
-    this.TEXT_Y = 460
+    this.TEXT_Y = 465
     this.TEXT_SIZE = 28
     this.TEXT_MAX_WIDTH = 700
 
     this.SPEAKER_X = centerX
-    this.SPEAKER_Y = 408
+    this.SPEAKER_Y = 413
     this.SPEAKER_SIZE = 48
     this.SPEAKER_FONT = 'cheekyrabbit'
 
     this.NEXT_TEXT = '[SPACE]'
     this.NEXT_X = centerX
     this.NEXT_SIZE = 20
-    this.NEXT_Y = 580 // 555
+    this.NEXT_Y = 575 // 555
 
     this.SKIP_TEXT = '' // WIP skip will be added later
     this.SKIP_X = centerX
@@ -81,6 +82,9 @@ class Talking extends Phaser.Scene {
     this.tweenDuration = 500
     this.OFFSCREEN_BOY = -500
     this.OFFSCREEN_GIRL = 1300
+
+    // start variables
+    this.start = false
   }
   
   preload() {
@@ -92,9 +96,11 @@ class Talking extends Phaser.Scene {
     this.load.image('dialogbox', 'img/dialogbox.png')
     this.load.image('choicebox', 'img/choicebox.png')
     this.load.image('boy', 'img/boy.png')
+    this.load.image('boy2', 'img/boy2.png')
     this.load.image('girl', 'img/girl.png')
     this.load.image('bgimg', 'img/couch.jpg')
     this.load.bitmapFont('futurahandwritten', 'fonts/futurahandwritten/futurahandwritten.png', 'fonts/futurahandwritten/futurahandwritten.xml')
+    this.load.bitmapFont('futurahandwritten_white', 'fonts/futurahandwritten_white/futurahandwritten_white.png', 'fonts/futurahandwritten_white/futurahandwritten_white.xml')
     this.load.bitmapFont('cheekyrabbit', 'fonts/cheekyrabbit/cheekyrabbit.png', 'fonts/cheekyrabbit/cheekyrabbit.xml')
   }
 
@@ -155,13 +161,25 @@ class Talking extends Phaser.Scene {
     this.choiceboxGroup.setVisible(false)
     this.choiceboxGroup.setActive(false)
 
+    this.startbg = this.add.rectangle(centerX, centerY, 800, 600, 0x000000)
+    this.startbg.alpha = 0.8
+    this.startbg.setVisible(false)
+
     this.typeText()
   }
 
   update() {
     if (this.playingPuzzle) {
       return
+    } else if (this.start) {
+      // this.startbg.setVisible(true)
+      // if (Phaser.Input.Keyboard.JustDown(cursors.space)) {
+      //   this.start = false
+      //   this.startbg.destroy()
+      //   this.bgm.play()
+      // }
     } else if (this.waitingForChoice) {
+      // keyboard support 
       if (Phaser.Input.Keyboard.JustDown(cursors.up)) {
         this.selectedChoice = Math.max(0, this.selectedChoice - 1)
         this.updateChoiceDisplay()
@@ -227,6 +245,15 @@ class Talking extends Phaser.Scene {
       this.dialogText.setPosition(this.TEXT_X, this.TEXT_Y)
 
       this.dialogSpeaker = currentLine['speaker']
+
+      if (this.dialogSpeaker == 'boy' && currentLine['sprite']) {
+        if (currentLine['sprite'] === 2) {
+          this.boy.sprite.setTexture('boy2')
+        }
+      } else if (this.dialogSpeaker == 'boy' && !currentLine['sprite']) {
+        this.boy.sprite.setTexture('boy')
+      }
+
       let dialogSprite = this.dialogSpeaker == 'boy' ? this.boy.sprite : this.girl.sprite
 
       if (this.dialogSpeaker == 'girl') {
@@ -265,11 +292,15 @@ class Talking extends Phaser.Scene {
         })
       }
 
+      // change based on speaker names
+      let speakerNameText = this.dialogSpeaker == 'boy' ? 'Liam' : 'Olivia'
+
       this.speakerName = this.add.bitmapText(
         this.SPEAKER_X,
         this.SPEAKER_Y,
         this.SPEAKER_FONT,
-        `${currentLine['speaker'].toUpperCase()}`,
+        // `${currentLine['speaker'].toUpperCase()}`,
+        `${speakerNameText.toUpperCase()}`,
         this.SPEAKER_SIZE
       ).setOrigin(0.5, 0)
 
@@ -318,7 +349,7 @@ class Talking extends Phaser.Scene {
     this.choiceInstructionText = this.add.bitmapText(
       centerX,
       30,
-      this.DBOX_FONT,
+      this.ALT_FONT,
       'Choose a response as the mediator.',
       24
     ).setOrigin(0.5, 0).setTint(0xffffff)
@@ -326,24 +357,24 @@ class Talking extends Phaser.Scene {
     this.waitingForChoice = true
     this.dialogTyping = false
     this.selectedChoice = 0
-    console.log("SHOWCHOICES: selectedChoice reset to 0")
+    // console.log("SHOWCHOICES: selectedChoice reset to 0")
 
     this.choiceTexts.forEach(text => text.destroy())
     this.choiceTexts = []
 
     choices.forEach((choice, index) => {
       const choiceText = this.add.bitmapText(
-        this.CHOICE_X,
+        this.CHOICE_X + 5,
         this.CHOICE_Y + (index * this.CHOICE_SPACING),
-        this.DBOX_FONT,
+        this.ALT_FONT,
         `${index + 1}. ${choice.text}`,
         this.CHOICE_SIZE
       )
       choiceText.maxWidth = this.CHOICE_MAX_WIDTH
       choiceText.setInteractive({ useHandCursor: true })
 
+      // mouse support
       choiceText.on('pointerover', () => {
-        // WIP need to add hover visual
         this.selectedChoice = index
         this.updateChoiceDisplay()
       })
@@ -351,7 +382,7 @@ class Talking extends Phaser.Scene {
       choiceText.on('pointerdown', () => {
         this.sound.play('blip02', { volume: 1.0 })
         this.selectedChoice = index
-        console.log("SHOWCHOICES: selectedChoice is ", this.selectedChoice)
+        // console.log("SHOWCHOICES: selectedChoice is ", this.selectedChoice)
         this.startPuzzle()
       })
 
@@ -364,9 +395,9 @@ class Talking extends Phaser.Scene {
   updateChoiceDisplay() {
     this.choiceTexts.forEach((text, index) => {
       if (index === this.selectedChoice) {
-        text.setTint(0xffff00)
+        text.setTint(0x601f9e)
       } else {
-        text.clearTint()
+        text.setTint(0x000000)
       }
     })
   }
@@ -388,8 +419,8 @@ class Talking extends Phaser.Scene {
     this.puzzleInstructionText = this.add.bitmapText(
       centerX,
       30,
-      this.DBOX_FONT,
-      'Keep the combo going! Place pieces quickly!',
+      this.ALT_FONT,
+      'Keep the combo going and place pieces quickly!',
       24
     ).setOrigin(0.5, 0).setTint(0xffffff)
 
@@ -397,7 +428,7 @@ class Talking extends Phaser.Scene {
     this.comboTimerText = this.add.bitmapText(
       centerX,
       60,
-      this.DBOX_FONT,
+      this.ALT_FONT,
       '',
       28
     ).setOrigin(0.5, 0).setTint(0xffff00)
@@ -405,7 +436,7 @@ class Talking extends Phaser.Scene {
     // generate the choice text as a texture
     const currentLine = this.dialog[this.dialogConvo][this.dialogLine]
     const selectedOption = currentLine.choices[this.selectedChoice]
-    console.log("STARTPUZZLE: selectedOption is ", selectedOption, " selectedChoice is ", this.selectedChoice)
+    // console.log("STARTPUZZLE: selectedOption is ", selectedOption, " selectedChoice is ", this.selectedChoice)
     const choiceText = selectedOption.text
 
     // create render texture
@@ -434,12 +465,12 @@ class Talking extends Phaser.Scene {
       puzzleHeight / 2,
       this.DBOX_FONT,
       choiceText,
-      28
+      30 // 28
     ).setOrigin(0.5).setTint(0xffffff)
     tempText.maxWidth = puzzleWidth - 30
     
     this.rt.draw(tempText, puzzleWidth / 2, puzzleHeight / 2)
-    this.rt.setVisible(false)
+    this.rt.setVisible(false) // hide the texture
     
     // create puzzle pieces
     this.createPuzzle(this.rt)
@@ -644,11 +675,11 @@ class Talking extends Phaser.Scene {
     // show failure message
     const failText = this.add.bitmapText(
       centerX,
-      centerY,
-      this.DBOX_FONT,
+      centerY - 30,
+      this.ALT_FONT,
       'Combo broken! Try again...',
       32
-    ).setOrigin(0.5).setTint(0xff0000).setAlpha(0)
+    ).setOrigin(0.5).setTint(0xffffff).setAlpha(0)
     
     this.tweens.add({
       targets: failText,
@@ -708,11 +739,11 @@ class Talking extends Phaser.Scene {
   selectChoice() {
     // WIP need to fix choice selection after 2nd choice pop-up
     const currentLine = this.dialog[this.dialogConvo][this.dialogLine]
-    console.log("SELECTCHOICE: printing currentLine ", currentLine)
-    console.log("SELECTCHOICE: printing selectedChoice ", this.selectedChoice)
+    // console.log("SELECTCHOICE: printing currentLine ", currentLine)
+    // console.log("SELECTCHOICE: printing selectedChoice ", this.selectedChoice)
 
     if (!currentLine.choices) {
-      console.error("selectChoice called on a line w/o choices RETURN")
+      // console.error("selectChoice called on a line w/o choices RETURN")
       return
     }
 

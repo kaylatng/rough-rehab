@@ -6,18 +6,30 @@
     },
     {
       "speaker": "boy",
-      "dialog": "Ever since we started dating, you were never nice to me. At least I'm trying to save this.",
+      "dialog": "Ever since we started dating, you were never nice to me. At least I'm trying to fix this!",
       "newSpeaker": "true"
     },
     {
       "speaker": "girl",
-      "dialog": "Why would I be nice to you after you admitted to wanting to cheat on me with your barber?!",
+      "dialog": "Fix this?! You're the one who admitted to wanting to cheat on me with your barber!",
       "newSpeaker": "true",
       "action": "shake"
     },
     {
       "speaker": "boy",
-      "dialog": "I never did! I just said the barber was attractive and my friends said the rest!",
+      "dialog": "I never did!",
+      "newSpeaker": "true"
+    },
+    {
+      "speaker": "boy",
+      "dialog": "Well, I don't think I said it sober...",
+      "newSpeaker": "true",
+      "action": "shake",
+      "sprite": 2
+    },
+    {
+      "speaker": "boy",
+      "dialog": "Wait, ok maybe.",
       "newSpeaker": "true"
     },
     {
@@ -32,7 +44,7 @@
 		},
 		{
 			"speaker" : "boy",
-			"dialog" : "Uncalled for...",
+			"dialog" : "Ouch.",
 			"newSpeaker" : "false",
 			"action": "shake"
 		},
